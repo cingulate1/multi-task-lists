@@ -485,9 +485,10 @@ export default function App() {
     }
   }, [menuOpen])
 
-  // 0.5s page flip: rotate the page edge-on (0.25s), swap faces while it is
-  // invisible at 90°, rotate back down (0.25s). Chrome (flip / create-list
-  // buttons) stays static like a notebook binding.
+  // 0.5s page flip with one continuous quartic acceleration: slow wind-up to
+  // the edge-on 90° point (0.42s), faces swap while invisible, then the last
+  // 90° snaps down (0.08s). Chrome (flip / create-list buttons) stays static
+  // like a notebook binding.
   const startFlip = useCallback(() => {
     if (flipBusy.current) return
     flipBusy.current = true
@@ -503,8 +504,8 @@ export default function App() {
         setFlip(null)
         flipBusy.current = false
         bump()
-      }, 260)
-    }, 250)
+      }, 95)
+    }, 420)
   }, [screen, bump])
 
   if (!data) return null

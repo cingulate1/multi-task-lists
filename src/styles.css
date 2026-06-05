@@ -37,17 +37,21 @@ body {
 .page.rev-in {
   pointer-events: none;
 }
+/* One continuous quartic acceleration across the whole 180° turn:
+   global progress = u^4, so 0→90° spans 0.42s and 90°→180° the last 0.08s.
+   The two phase curves are the global curve re-normalized per segment —
+   angular velocity is continuous (~856°/s) across the face swap at 90°. */
 .page.fwd-out {
-  animation: pageFwdOut 0.25s ease-in forwards;
+  animation: pageFwdOut 0.42s cubic-bezier(0.895, 0.03, 0.685, 0.22) forwards;
 }
 .page.fwd-in {
-  animation: pageFwdIn 0.25s ease-out;
+  animation: pageFwdIn 0.08s cubic-bezier(0.33, 0.25, 0.67, 0.58);
 }
 .page.rev-out {
-  animation: pageRevOut 0.25s ease-in forwards;
+  animation: pageRevOut 0.42s cubic-bezier(0.895, 0.03, 0.685, 0.22) forwards;
 }
 .page.rev-in {
-  animation: pageRevIn 0.25s ease-out;
+  animation: pageRevIn 0.08s cubic-bezier(0.33, 0.25, 0.67, 0.58);
 }
 @keyframes pageFwdOut {
   from {
