@@ -3,5 +3,3 @@ dist/
 release/
 *.exe
 state.json
-# icon temporarily untracked (film-still placeholder; SD replacement pending)
-build/
