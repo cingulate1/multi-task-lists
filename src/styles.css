@@ -1,0 +1,490 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: Arial, 'Segoe UI', sans-serif;
+  background: #0a0f1f;
+  color: #e8eaf2;
+  user-select: none;
+}
+
+.appRoot {
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* ---- celebration plasma (z 0, behind everything) ---- */
+.celebration {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  filter: blur(26px) saturate(1.08);
+  transform: scale(1.15);
+  pointer-events: none;
+}
+
+/* ---- arrows (z 1, under all cards: splines can never cross text) ---- */
+.arrows {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+.link {
+  fill: none;
+  stroke: #ff4fa3;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+.linkHit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 14;
+  pointer-events: visibleStroke;
+  cursor: context-menu;
+}
+.linkTemp {
+  fill: none;
+  stroke: #ff4fa3;
+  stroke-width: 1.4;
+  stroke-dasharray: 5 4;
+  pointer-events: none;
+}
+
+/* ---- layout: pointer-events none so gutter clicks reach the arrows ---- */
+.layout {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+  padding: 6px 12px 12px;
+  gap: 2px;
+}
+.columnsRow {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  gap: 40px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  pointer-events: none;
+}
+.columnsRow .section {
+  flex: 1 1 0;
+}
+.section.bottom {
+  flex: 0 0 15vh;
+  min-height: 100px;
+}
+
+button:focus {
+  outline: none;
+}
+
+/* ---- face flip + back-face chrome ---- */
+.flipBtn {
+  position: absolute;
+  top: 8px;
+  left: 14px;
+  z-index: 5;
+  width: 42px;
+  height: 33px;
+  border-radius: 9px;
+  border: 3.75px solid #ffffff;
+  background: #131a2e;
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  font-family: inherit;
+  padding: 0;
+}
+.flipBtn:hover {
+  transform: scale(1.08);
+}
+
+/* flip / create-list float on the same row as the first section's + button */
+.topFloat {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 8;
+  pointer-events: auto;
+}
+.createWrap {
+  position: relative;
+  pointer-events: auto;
+  display: flex;
+  justify-content: center;
+}
+.createMenu {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: #131a2e;
+  border: 2.5px solid #ffffff;
+  border-radius: 9px;
+  padding: 9px;
+  z-index: 9;
+  min-width: 130px;
+}
+.createMenu button {
+  height: 32px;
+  border-radius: 6px;
+  border: 2px solid #cfd6e6;
+  background: transparent;
+  color: #e8eaf2;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
+.createMenu button:hover:not(:disabled) {
+  border-color: #ffffff;
+  color: #ffffff;
+}
+.createMenu button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* ---- front sections: vertical stack with draggable boundaries ---- */
+.sectionsArea {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+}
+.bandWrap {
+  position: relative;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+}
+.bandWrap > .section,
+.bandWrap > .columnsRow {
+  flex: 1 1 0;
+  min-height: 0;
+}
+/* the whole button band of a non-first section doubles as its resize handle */
+.resizeStrip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 39px;
+  cursor: ns-resize;
+  z-index: 4;
+  pointer-events: auto;
+}
+.createListBtn {
+  pointer-events: auto;
+  height: 33px;
+  padding: 0 21px;
+  border-radius: 9px;
+  border: 3px solid #ffffff;
+  background: #131a2e;
+  color: #ffffff;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+.createListBtn:hover {
+  transform: scale(1.06);
+}
+
+.section.white .addBtn {
+  border: 2px solid #f5f7ff;
+  color: #f5f7ff;
+}
+.task.white .labelBox {
+  color: #ffffff;
+}
+
+.sectionHeader {
+  flex: 0 0 39px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 4px;
+  position: relative;
+  z-index: 6; /* + buttons stay clickable above the resize strip */
+}
+.addBtn {
+  pointer-events: auto;
+  width: 33px;
+  height: 33px;
+  border-radius: 50%;
+  background: #131a2e;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.section.green .addBtn {
+  border: 2px solid #3ed47f;
+  color: #3ed47f;
+}
+.section.blue .addBtn {
+  border: 2px solid #38c8d8;
+  color: #38c8d8;
+}
+.section.purple .addBtn {
+  border: 2px solid #8b7cff;
+  color: #8b7cff;
+}
+.section.bottom .addBtn {
+  border: 2px solid #ff4747;
+  color: #ff4747;
+}
+.addBtn:hover {
+  transform: scale(1.1);
+}
+
+.sectionBody {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  pointer-events: none;
+}
+.sectionBody.v {
+  flex-direction: column;
+}
+.sectionBody.h {
+  flex-direction: row;
+}
+
+/* every slot is exactly (section height / N) tall — set inline via flex-basis */
+.slot {
+  min-height: 0;
+  min-width: 0;
+}
+.slot.v {
+  padding: 3px 7px;
+}
+.slot.h {
+  padding: 4px 8px;
+  height: 100%;
+}
+
+/* ---- task card ---- */
+.task {
+  pointer-events: auto;
+  position: relative;
+  height: 100%;
+  width: 100%;
+  background: #131a2e;
+  border: 2px solid rgba(255, 255, 255, 0.16);
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px 2px 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+.task.dragging {
+  opacity: 0.92;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.55);
+  border-color: rgba(255, 255, 255, 0.32);
+}
+
+.task .content {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.45em;
+}
+.task.checked .content {
+  opacity: 0.75;
+}
+
+.handle {
+  flex: 0 0 auto;
+  cursor: grab;
+  color: #5d6682;
+  font-size: 0.95em;
+  padding: 0 2px;
+  touch-action: none;
+}
+.handle:active {
+  cursor: grabbing;
+}
+
+.checkbox {
+  flex: 0 0 auto;
+  width: 1.05em;
+  height: 1.05em;
+  border: 0.13em solid #e8eaf2;
+  border-radius: 0.15em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1em;
+  line-height: 1;
+  color: #e8eaf2;
+  background: #0d1426;
+  font-weight: bold;
+}
+
+/* gated / not-yet-actionable checkbox: grayed like a completed item,
+   but the task text itself stays at full opacity */
+.checkbox.locked {
+  border-color: #828a9e;
+  color: #828a9e;
+  opacity: 0.75;
+  cursor: default;
+}
+
+.labelBox {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  line-height: 1.18;
+  font-weight: 700;
+}
+.labelText {
+  width: 100%;
+  overflow-wrap: break-word;
+}
+.task.green .labelBox {
+  color: #3ed47f;
+}
+.task.blue .labelBox {
+  color: #38c8d8;
+}
+.task.purple .labelBox {
+  color: #8b7cff;
+}
+.task.bottom .labelBox,
+.task.band .labelBox {
+  color: #ff4747;
+  font-weight: 800;
+  justify-content: center;
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+
+.editInput {
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px dashed currentColor;
+  outline: none;
+  user-select: text;
+}
+
+/* hover-only delete x, top-right inside the item boundary */
+.deleteX {
+  position: absolute;
+  top: 1px;
+  right: 5px;
+  z-index: 7;
+  font-size: 13px;
+  line-height: 1;
+  color: #7e8699;
+  opacity: 0;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: opacity 0.1s;
+  font-weight: 400;
+}
+.task:hover .deleteX {
+  opacity: 0.85;
+}
+.deleteX:hover {
+  color: #c9d0e0;
+}
+
+/* ---- connection ports ---- */
+.port {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2.2px solid #ff4fa3;
+  background: #0a0f1f;
+  opacity: 0;
+  z-index: 6;
+  cursor: crosshair;
+  transition: opacity 0.12s, transform 0.12s;
+}
+.port.tm {
+  left: calc(50% - 5.5px);
+  top: -6px;
+}
+.port.bm {
+  left: calc(50% - 5.5px);
+  bottom: -6px;
+}
+.port.lm {
+  left: -6px;
+  top: calc(50% - 5.5px);
+}
+.port.rm {
+  right: -6px;
+  top: calc(50% - 5.5px);
+}
+.task:hover .port {
+  opacity: 0.45;
+}
+.port.available {
+  opacity: 1;
+  transform: scale(1.25);
+}
+.port.armed {
+  opacity: 1;
+  background: #ff4fa3;
+  transform: scale(1.3);
+}
