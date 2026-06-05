@@ -65,6 +65,7 @@ export default function App() {
   const [editingId, setEditingId] = useState(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [resizing, setResizing] = useState(false)
+  const [flip, setFlip] = useState(null) // null | '(fwd|rev)-(out|in)'
   const [tick, setTick] = useState(0)
   const rootRef = useRef(null)
   const cardEls = useRef(new Map())
@@ -72,6 +73,7 @@ export default function App() {
   const dataRef = useRef(null)
   const dragRef = useRef(null) // pending port drag { x, y, moved }
   const resizeRef = useRef(null) // { boundary, startY, startSizes, rootH }
+  const flipBusy = useRef(false)
 
   useEffect(() => {
     armedRef.current = armed
@@ -483,6 +485,28 @@ export default function App() {
     }
   }, [menuOpen])
 
+  // 0.5s page flip: rotate the page edge-on (0.25s), swap faces while it is
+  // invisible at 90°, rotate back down (0.25s). Chrome (flip / create-list
+  // buttons) stays static like a notebook binding.
+  const startFlip = useCallback(() => {
+    if (flipBusy.current) return
+    flipBusy.current = true
+    const dir = screen === 'front' ? 'fwd' : 'rev'
+    setArmed(null)
+    setEditingId(null)
+    setMenuOpen(false)
+    setFlip(dir + '-out')
+    setTimeout(() => {
+      setScreen((s) => (s === 'front' ? 'back' : 'front'))
+      setFlip(dir + '-in')
+      setTimeout(() => {
+        setFlip(null)
+        flipBusy.current = false
+        bump()
+      }, 260)
+    }, 250)
+  }, [screen, bump])
+
   if (!data) return null
 
   const board = boardOf(data, screen)
@@ -512,24 +536,10 @@ export default function App() {
   return (
     <div className="appRoot" ref={rootRef}>
       {allDone && <Celebration />}
-      <ArrowLayer
-        links={board.links}
-        cardEls={cardEls}
-        rootRef={rootRef}
-        tick={tick}
-        armed={armed}
-        cursor={cursor}
-        onDeleteLink={deleteLink}
-      />
       <button
         className="flipBtn"
         title={screen === 'front' ? 'Flip to back' : 'Flip to front'}
-        onClick={() => {
-          setArmed(null)
-          setEditingId(null)
-          setMenuOpen(false)
-          setScreen((s) => (s === 'front' ? 'back' : 'front'))
-        }}
+        onClick={startFlip}
       >
         &#8644;
       </button>
@@ -557,13 +567,23 @@ export default function App() {
           </button>
         )}
       </div>
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragStart={() => setArmed(null)}
-        onDragMove={bump}
-        onDragEnd={onDragEnd}
-      >
+      <div className={`page${flip ? ' ' + flip : ''}`}>
+        <ArrowLayer
+          links={board.links}
+          cardEls={cardEls}
+          rootRef={rootRef}
+          tick={tick}
+          armed={armed}
+          cursor={cursor}
+          onDeleteLink={deleteLink}
+        />
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={() => setArmed(null)}
+          onDragMove={bump}
+          onDragEnd={onDragEnd}
+        >
         {screen === 'front' ? (
           <div className="layout">
             <div className="sectionsArea">
@@ -634,7 +654,8 @@ export default function App() {
             </div>
           </div>
         )}
-      </DndContext>
+        </DndContext>
+      </div>
     </div>
   )
 }

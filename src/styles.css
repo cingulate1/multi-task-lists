@@ -23,6 +23,69 @@ body {
   height: 100vh;
   width: 100vw;
   overflow: hidden;
+  perspective: 1600px;
+}
+
+/* ---- 0.5s page flip: out to 90° (edge-on), faces swap, in from -90° ---- */
+.page {
+  position: absolute;
+  inset: 0;
+}
+.page.fwd-out,
+.page.fwd-in,
+.page.rev-out,
+.page.rev-in {
+  pointer-events: none;
+}
+.page.fwd-out {
+  animation: pageFwdOut 0.25s ease-in forwards;
+}
+.page.fwd-in {
+  animation: pageFwdIn 0.25s ease-out;
+}
+.page.rev-out {
+  animation: pageRevOut 0.25s ease-in forwards;
+}
+.page.rev-in {
+  animation: pageRevIn 0.25s ease-out;
+}
+@keyframes pageFwdOut {
+  from {
+    transform: rotateY(0);
+  }
+  to {
+    transform: rotateY(-90deg);
+  }
+}
+@keyframes pageFwdIn {
+  from {
+    transform: rotateY(90deg);
+  }
+  to {
+    transform: rotateY(0);
+  }
+}
+@keyframes pageRevOut {
+  from {
+    transform: rotateY(0);
+  }
+  to {
+    transform: rotateY(90deg);
+  }
+}
+@keyframes pageRevIn {
+  from {
+    transform: rotateY(-90deg);
+  }
+  to {
+    transform: rotateY(0);
+  }
+}
+/* connectors are re-measured only after the flip settles — hide the stale
+   ones while the incoming face rotates down */
+.page.fwd-in .arrows,
+.page.rev-in .arrows {
+  opacity: 0;
 }
 
 /* ---- celebration plasma (z 0, behind everything) ---- */
@@ -45,6 +108,7 @@ body {
   height: 100%;
   z-index: 1;
   pointer-events: none;
+  transition: opacity 0.15s;
 }
 .link {
   fill: none;
